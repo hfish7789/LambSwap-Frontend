@@ -1,0 +1,112 @@
+div{
+    font-family: Spline Sans;
+    font-style: normal;
+}
+
+#demo-radio-buttons-group-label{
+  color:white;
+  padding-bottom:20px;
+  font-weight: 500;
+  font-size: 36px;
+  line-height: 43px;
+}
+
+#demo-radio-buttons-group-label1{
+  color:white;
+  padding-bottom:20px;
+  font-weight: 500;
+  font-size: 36px;
+  line-height: 43px;
+}
+
+@keyframes Eth_gerak {
+  0%   {padding: 121px 0 0 0;}
+  50%  {padding: 131px 0 0 0;}
+  100%  {padding: 121px 0 0 0;}
+}
+
+@keyframes Bnb_gerak {
+  0%   {padding: 8px 0 0 18px;}
+  50%  {padding: 18px 0 0 18px;}
+  100%  {padding: 8px 0 0 18px;}
+}
+
+@keyframes Lamb_gerak {
+  0%   {padding: 0 0 0 148px;}
+  50%  {padding: 10px 0 0 148px;}
+  100%  {padding: 0 0 0 148px;}
+}
+
+@keyframes Soland_gerak {
+  0%   {padding: 10px 0 0 265px;}
+  50%  {padding: 20px 0 0 265px;}
+  100%  {padding: 10px 0 0 265px;}
+}
+
+@keyframes Poland_gerak {
+  0%   {padding: 126px 0 0 288px;}
+  50%  {padding: 136px 0 0 288px;}
+  100%  {padding: 126px 0 0 288px;}
+}
+
+@keyframes spin { 
+  100% {
+    transform:rotate(360deg); 
+  }
+}
+
+@media only screen and (max-width: 900px) {
+  .site-info {
+    margin-top: 350px;
+  }
+  .img-rotate {
+    margin-left: -48px;
+  }
+  .analyzing{
+    margin-left: -105px;
+  }
+  .responsive1{
+    margin-top: 250px;
+  }
+  .responsive2{
+    padding-top: 20px !important;
+  }
+}
+
+@media only screen and (max-width: 425px) {
+  @keyframes Eth_gerak {
+    0%   {padding: 85px 0 0 0;}
+    50%  {padding: 95px 0 0 0;}
+    100%  {padding: 85px 0 0 0;}
+  }
+  
+  @keyframes Bnb_gerak {
+    0%   {padding: 8px 0 0 4.06%;}
+    50%  {padding: 18px 0 0 4.06%;}
+    100%  {padding: 8px 0 0 4.06%;}
+  }
+  
+  @keyframes Lamb_gerak {
+    0%   {padding: 0 0 0 33.48%;}
+    50%  {padding: 10px 0 0 33.48%;}
+    100%  {padding: 0 0 0 33.48%;}
+  }
+  
+  @keyframes Soland_gerak {
+    0%   {padding: 10px 0 0 59.8%;}
+    50%  {padding: 20px 0 0 59.8%;}
+    100%  {padding: 10px 0 0 59.8%;}
+  }
+  
+  @keyframes Poland_gerak {
+    0%   {padding: 85px 0 0 65%;}
+    50%  {padding: 95px 0 0 65%;}
+    100%  {padding: 85px 0 0 65%;}
+  }
+  
+  @keyframes spin { 
+    100% {
+      transform:rotate(360deg); 
+    }
+  }
+}
