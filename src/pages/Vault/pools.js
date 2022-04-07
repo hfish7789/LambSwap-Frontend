@@ -117,7 +117,7 @@ function Detail(props) {
                     </Stack>
                 </TableCell>
                 <TableCell sx={{ p: "24px 0 24px 30px" }} align="right">
-                    <Button onClick={() => openDetail(chain.tokens.find(token => (token.address === data.token1_address)), chain.tokens.find(token => (token.address === data.token2_address)))} sx={{ background: "linear-gradient(279.93deg, #262626 0%, rgba(54, 51, 51, 0.99) 100%)", minWidth: "0", width: "40px", mr: "15px", p: "10px 0", borderRadius: "10px" }}><Typography component="img" src={pool} /></Button>
+                    <Button onClick={() => openDetail(chain.test_tokens.find(token => (token.address === data.token1_address)), chain.test_tokens.find(token => (token.address === data.token2_address)))} sx={{ background: "linear-gradient(279.93deg, #262626 0%, rgba(54, 51, 51, 0.99) 100%)", minWidth: "0", width: "40px", mr: "15px", p: "10px 0", borderRadius: "10px" }}><Typography component="img" src={pool} /></Button>
                     <IconButton
                         aria-label="expand row"
                         size="small"
@@ -161,8 +161,8 @@ function Detail(props) {
                                 </Stack>
                                 {active ?
                                     <Stack direction="row" spacing={2} sx={{ my: "22px" }}>
-                                        <ConnectButton variant='contained' color='secondary' onClick={() => setPoolCreateDialogState({ title: 'Remove Liquidity', token1: chain.tokens.find(token => (token.address === data.token1_address)), token2: chain.tokens.find(token => (token.address === data.token2_address)) })}>Remove&nbsp;Liquidity</ConnectButton>
-                                        <ConnectButton variant='contained' sx={{ background: "linear-gradient(100.22deg, #34F14B 0%, #139F24 100%)" }} onClick={() => setPoolCreateDialogState({ title: 'Provide Liquidity', token1: chain.tokens.find(token => (token.address === data.token1_address)), token2: chain.tokens.find(token => (token.address === data.token2_address)) })}>Provide&nbsp;Liquidity</ConnectButton>
+                                        <ConnectButton variant='contained' color='secondary' onClick={() => setPoolCreateDialogState({ title: 'Remove Liquidity', token1: chain.test_tokens.find(token => (token.address === data.token1_address)), token2: chain.test_tokens.find(token => (token.address === data.token2_address)) })}>Remove&nbsp;Liquidity</ConnectButton>
+                                        <ConnectButton variant='contained' sx={{ background: "linear-gradient(100.22deg, #34F14B 0%, #139F24 100%)" }} onClick={() => setPoolCreateDialogState({ title: 'Provide Liquidity', token1: chain.test_tokens.find(token => (token.address === data.token1_address)), token2: chain.test_tokens.find(token => (token.address === data.token2_address)) })}>Provide&nbsp;Liquidity</ConnectButton>
                                     </Stack>
                                     :
                                     <ConnectButton variant='contained' onClick={() => setIsOpenDialog(true)} sx={{ width: "100%", my: "22px" }}>connect&nbsp;wallet</ConnectButton>
@@ -190,12 +190,12 @@ export default function pools({ chain, setIsOpenDialog }) {
     const [searchText, setSearchText] = React.useState('');
 
     useEffect(() => {
-        get_pools(chain.chainId)
+        get_pools(chain.test_chainId)
             .then((data) => {
                 if (data !== "NoResult") {
                     data.map((pool, index) => {
-                        let token_1 = chain.tokens.find(token => (token.address === pool.token1_address));
-                        let token_2 = chain.tokens.find(token => (token.address === pool.token2_address));
+                        let token_1 = chain.test_tokens.find(token => (token.address === pool.token1_address));
+                        let token_2 = chain.test_tokens.find(token => (token.address === pool.token2_address));
                         data[index].token1_symbol = token_1.symbol;
                         data[index].token2_symbol = token_2.symbol;
                         data[index].token1_logoURI = token_1.logoURI;
@@ -228,8 +228,8 @@ export default function pools({ chain, setIsOpenDialog }) {
         filter_pool(value).then(data => {
             if (data !== "NoResult") {
                 data.map((pool, index) => {
-                    let token_1 = chain.tokens.find(token => (token.address === pool.token1_address));
-                    let token_2 = chain.tokens.find(token => (token.address === pool.token2_address));
+                    let token_1 = chain.test_tokens.find(token => (token.address === pool.token1_address));
+                    let token_2 = chain.test_tokens.find(token => (token.address === pool.token2_address));
                     data[index].token1_symbol = token_1.symbol;
                     data[index].token2_symbol = token_2.symbol;
                     data[index].token1_logoURI = token_1.logoURI;
@@ -374,7 +374,7 @@ export default function pools({ chain, setIsOpenDialog }) {
                                         multiple
                                         className="pool-filter-i"
                                         getOptionLabel={(option) => option.symbol}
-                                        options={chain.tokens}
+                                        options={chain.test_tokens}
                                         renderOption={(props, option) => (
                                             <Stack direction="row" spacing={1} alignItems="center" {...props} >
                                                 {option.logoURI !== null ?
@@ -403,7 +403,7 @@ export default function pools({ chain, setIsOpenDialog }) {
                                         )}
                                     />
                                 </ThemeProvider>
-                                <Button variant='outlined' onClick={() => setPoolCreateDialogState({ title: "Create Liquidity Pool", token1: chain.tokens[0], token2: chain.tokens[1] })} startIcon={<AddIcon />} sx={{ color: "#7E8B74", borderRadius: "12px", borderColor: "#7E8B74", p: "0 20px" }}>
+                                <Button variant='outlined' onClick={() => setPoolCreateDialogState({ title: "Create Liquidity Pool", token1: chain.test_tokens[0], token2: chain.test_tokens[1] })} startIcon={<AddIcon />} sx={{ color: "#7E8B74", borderRadius: "12px", borderColor: "#7E8B74", p: "0 20px" }}>
                                     Create&nbsp;{matches600 ? "" : " "}Pool
                                 </Button>
                             </Stack>

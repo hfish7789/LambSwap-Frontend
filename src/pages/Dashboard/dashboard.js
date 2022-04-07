@@ -37,12 +37,21 @@ const DashPaper2 = styled(Paper)(() => ({
 }));
 
 const DashMenuItem = styled(MenuItem)(() => ({
-    fontSize:"14px",
-    padding:"10px 50px"
+    fontSize: "14px",
+    padding: "10px 50px"
 }));
 
 const TableTypography = styled(Typography)(() => ({
     fontSize: "18px"
+}));
+
+const DashButton = styled(Button)(() => ({
+    color: "white",
+    borderRadius: "30px",
+    maxWidth: "160px",
+    width: "100%",
+    background: "linear-gradient(100.22deg, #34F14B 0%, #139F24 100%)",
+    fontWeight: 550
 }));
 
 export default function vault() {
@@ -51,7 +60,7 @@ export default function vault() {
     const [poolChart, setPoolChart] = React.useState(1);
     const [liquiditys, setLiquiditys] = React.useState([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
     const [vaults, setVaults] = React.useState([1, 1, 1, 1, 1, 1, 1, 1, 1]);
-    const [transactions, setTransactions] = React.useState([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]);
+    const [transactions, setTransactions] = React.useState([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
     const [page, setPage] = React.useState(1);
     const tablePageChange = (event, value) => {
         setPage(value);
@@ -106,14 +115,14 @@ export default function vault() {
                                         onChange={PoolChange}
                                         sx={{ width: "150px", textAlign: "center" }}
                                     >
-                                        <DashMenuItem sx={{color:"#7E8B74"}} value={1}>ALL</DashMenuItem>
-                                        <DashMenuItem sx={{color:"#FFFF00"}} value={2}>ETH-Pool</DashMenuItem>
-                                        <DashMenuItem sx={{color:"#FFFF00"}} value={3}>ETH-Pool</DashMenuItem>
-                                        <DashMenuItem sx={{color:"#FFFF00"}} value={4}>ETH-Pool</DashMenuItem>
-                                        <DashMenuItem sx={{color:"#FFFF00"}} value={5}>ETH-Pool</DashMenuItem>
-                                        <DashMenuItem sx={{color:"#FFFF00"}} value={6}>ETH-Pool</DashMenuItem>
-                                        <DashMenuItem sx={{color:"#FFFF00"}} value={7}>ETH-Pool</DashMenuItem>
-                                        <DashMenuItem sx={{color:"#FFFF00"}} value={8}>ETH-Pool</DashMenuItem>
+                                        <DashMenuItem sx={{ color: "#7E8B74" }} value={1}>ALL</DashMenuItem>
+                                        <DashMenuItem sx={{ color: "#FFFF00" }} value={2}>ETH-Pool</DashMenuItem>
+                                        <DashMenuItem sx={{ color: "#FFFF00" }} value={3}>ETH-Pool</DashMenuItem>
+                                        <DashMenuItem sx={{ color: "#FFFF00" }} value={4}>ETH-Pool</DashMenuItem>
+                                        <DashMenuItem sx={{ color: "#FFFF00" }} value={5}>ETH-Pool</DashMenuItem>
+                                        <DashMenuItem sx={{ color: "#FFFF00" }} value={6}>ETH-Pool</DashMenuItem>
+                                        <DashMenuItem sx={{ color: "#FFFF00" }} value={7}>ETH-Pool</DashMenuItem>
+                                        <DashMenuItem sx={{ color: "#FFFF00" }} value={8}>ETH-Pool</DashMenuItem>
                                     </Select>
                                 </Stack>
                             </Stack>
@@ -125,7 +134,7 @@ export default function vault() {
                                 <Typography sx={{ color: "#7E8B74" }}>Liquidity</Typography>
                                 <Stack direction="row" alignItems="center" spacing={2}>
                                     <Typography sx={{ color: "#34F14B", fontSize: "36px", fontWeight: "bold", fontFamily: "Spline Sans" }}>$&nbsp;431,954.97</Typography>
-                                    <Chip size='small' label={`${103.34}$`} sx={{ color:"white", background:"#37AF43",borderRadius:"6px"}} />
+                                    <Chip size='small' label={`${103.34}$`} sx={{ color: "white", background: "#37AF43", borderRadius: "6px" }} />
                                 </Stack>
                                 <Typography>2022-02-03</Typography>
                             </Stack>
@@ -133,7 +142,7 @@ export default function vault() {
                     </Grid>
                 </Grid>
                 <Grid>
-                    <TableTypography sx={{pl:"10px"}}>LIQUIDITY</TableTypography>
+                    <TableTypography sx={{ pl: "10px" }}>LIQUIDITY</TableTypography>
                     <Stack sx={{ p: "0 3%" }}>
                         <TableContainer component={Paper} sx={{ background: "transparent" }}>
                             <Table aria-label="simple table" sx={{ mt: "56px" }}>
@@ -172,7 +181,7 @@ export default function vault() {
                                                 <TableTypography>$&nbsp;70,102.12</TableTypography>
                                             </TableCell>
                                             <TableCell sx={{ p: "24px 0 24px 30px" }} align="right">
-                                                <Button variant='contained' sx={{ color: "white", borderRadius: "30px", maxWidth: "160px", width: "100%" }}>add&nbsp;liquidity</Button>
+                                                <DashButton variant='contained'>add&nbsp;liquidity</DashButton>
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -182,7 +191,7 @@ export default function vault() {
                     </Stack>
                 </Grid>
                 <Grid sx={{ pt: "76px" }}>
-                    <TableTypography sx={{pl:"10px"}}>VAULT</TableTypography>
+                    <TableTypography sx={{ pl: "10px" }}>VAULT</TableTypography>
                     <Stack sx={{ m: "0 3%" }}>
                         <TableContainer component={Paper} sx={{ background: "transparent" }}>
                             <Table aria-label="simple table" sx={{ mt: "56px" }}>
@@ -214,7 +223,7 @@ export default function vault() {
                                                 <TableTypography>$&nbsp;0</TableTypography>
                                             </TableCell>
                                             <TableCell sx={{ p: "24px 0 24px 30px" }} align="right">
-                                                <Button variant='contained' sx={{ color: "white", borderRadius: "30px", maxWidth: "160px", width: "100%" }}>skake</Button>
+                                                <DashButton variant='contained'>skake</DashButton>
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -224,7 +233,7 @@ export default function vault() {
                     </Stack>
                 </Grid>
                 <Grid sx={{ pt: "76px" }}>
-                    <TableTypography sx={{pl:"10px"}}>TRANSACTION</TableTypography>
+                    <TableTypography sx={{ pl: "10px" }}>TRANSACTION</TableTypography>
                     <Grid container sx={{ p: "0 3%" }} justifyContent="space-between">
                         <Grid xs={9} md={10}>
                             <TableContainer component={Paper} sx={{ background: "transparent" }}>
@@ -242,7 +251,7 @@ export default function vault() {
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
-                                        {transactions.slice(page*9-9, page*9-1).map((data, index) => (
+                                        {transactions.slice(page * 9 - 9, page * 9 - 1).map((data, index) => (
                                             <TableRow
                                                 key={index}
                                                 sx={{ '&:last-child th, &:last-child td': { border: 0 } }}
@@ -257,7 +266,7 @@ export default function vault() {
                                                     <TableTypography>BSC&nbsp;to&nbsp;ETH</TableTypography>
                                                 </TableCell>
                                                 <TableCell sx={{ p: "32px 30px" }}>
-                                                    <TableTypography>$&nbsp;{4482+index*page}</TableTypography>
+                                                    <TableTypography>$&nbsp;{4482 + index * page}</TableTypography>
                                                 </TableCell>
                                                 <TableCell sx={{ p: "32px 30px" }}>
                                                     <TableTypography>0x7ACd...F965EA</TableTypography>
@@ -275,15 +284,15 @@ export default function vault() {
                             </TableContainer>
                         </Grid>
                         <Grid xs={2.7} md={1.7} sx={{ pt: "91px" }}>
-                            {transactions.slice(page*9-9, page*9-1).map((data, index) => (
+                            {transactions.slice(page * 9 - 9, page * 9 - 1).map((data, index) => (
                                 <Stack key={index} sx={{ p: "27.5px 0" }}>
-                                    <Button variant='contained' sx={{ color: "white", borderRadius: "30px", maxWidth: "160px", width: "100%" }}>stake</Button>
+                                    <DashButton variant='contained'>stake</DashButton>
                                 </Stack>
                             ))}
                         </Grid>
                     </Grid>
-                    <Stack sx={{p:"30px 3%"}} direction="row" justifyContent="flex-end">
-                        <Pagination count={Math.ceil(transactions.length/9)} page={page} siblingCount={matches425 ? 1 : 0} onChange={tablePageChange} />
+                    <Stack sx={{ p: "30px 3%" }} direction="row" justifyContent="flex-end">
+                        <Pagination count={Math.ceil(transactions.length / 9)} page={page} siblingCount={matches425 ? 1 : 0} onChange={tablePageChange} />
                     </Stack>
                 </Grid>
             </Container>

@@ -16,6 +16,8 @@ import {
     Avatar
 } from '@mui/material';
 
+import { useWeb3React } from "@web3-react/core";
+import Web3 from 'web3';
 import { CustomTab } from '../../config/style';
 
 import { styled } from '@mui/material/styles';
@@ -57,6 +59,10 @@ export default function hub({ chainState, tabValue, setTabValue }) {
     const [iconState, setIconState] = React.useState(0);
     const [token1, setToken1] = React.useState(chainState.tokens[0].symbol);
     const [token2, setToken2] = React.useState(chainState.tokens[1].symbol);
+    const { active, account } = useWeb3React();
+    const web3 = new Web3(window.ethereum);
+    const BN = web3.utils.BN;
+    
     React.useEffect(() => {
         setToken1(chainState.tokens[0].symbol);
         setToken2(chainState.tokens[1].symbol);

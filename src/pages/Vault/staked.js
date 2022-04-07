@@ -35,14 +35,14 @@ export default function Staked({ chainState, menuPage, setChainState, setIsOpenD
         setVaultChainMenuState(event.currentTarget);
     }
 
-    const vaultChainMenuClose = async (event, data) => {
+    const vaultChainMenuClose = async (event, data, status) => {
         setVaultChainMenuState(null);
         if (data && data !== "backdropClick") {
             if (data) {
                 // if (active) {
                 await window.ethereum.request({
                     method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: `0x${Number(data.chainId).toString(16)}` }], // chainId must be in hexadecimal numbers
+                    params: [{ chainId: `0x${Number(status === 1 ? data.chainId : data.test_chainId).toString(16)}` }], // chainId must be in hexadecimal numbers
                 }).then(() => {
                     setChainState(data)
                 });
@@ -110,14 +110,25 @@ export default function Staked({ chainState, menuPage, setChainState, setIsOpenD
                     open={Boolean(vaultChainMenuState)}
                     onClose={vaultChainMenuClose}
                 >
-                    {Chains.map((data, index) => (
-                        <MenuItem key={index} onClick={(e) => vaultChainMenuClose(e, data)}>
-                            <Stack direction="row" sx={{ padding: "4px" }}>
-                                <Typography component="img" src={data.logo1}></Typography>&nbsp;&nbsp;
-                                <Typography>{data.name}</Typography>
-                            </Stack>
-                        </MenuItem>
-                    ))}
+                    {menuPage === 1 ?
+                        Chains.map((data, index) => (
+                            <MenuItem key={index} onClick={(e) => vaultChainMenuClose(e, data, 1)}>
+                                <Stack direction="row" sx={{ padding: "4px" }}>
+                                    <Typography component="img" src={data.logo1}></Typography>&nbsp;&nbsp;
+                                    <Typography>{data.name}</Typography>
+                                </Stack>
+                            </MenuItem>
+                        ))
+                        :
+                        [Chains[0], Chains[2]].map((data, index) => (
+                            <MenuItem key={index} onClick={(e) => vaultChainMenuClose(e, data, 2)}>
+                                <Stack direction="row" sx={{ padding: "4px" }}>
+                                    <Typography component="img" src={data.logo1}></Typography>&nbsp;&nbsp;
+                                    <Typography>{data.name}</Typography>
+                                </Stack>
+                            </MenuItem>
+                        ))
+                    }
                 </Menu>
             </Container>
         </Box>

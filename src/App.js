@@ -68,6 +68,7 @@ import { useWeb3React } from "@web3-react/core";
 import Cwallet from "./assets/constants/Cwallet";
 import { Chains, Connected, Wallets } from "./assets/constants/wallets";
 import Language from './assets/constants/language';
+import { get_tokens } from "./services/tokens/tokens.service";
 
 import './App.css';
 
@@ -100,7 +101,7 @@ const AppTab = styled(Tab)(() => ({
 
 const HomeTypography2 = styled(Typography)(() => ({
   padding: "10px",
-  textAlign: "center"
+  textAlign: "center",
 }));
 
 function TabPanel(props) {
@@ -228,7 +229,10 @@ function App() {
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: `0x${Number(data.chainId).toString(16)}` }], // chainId must be in hexadecimal numbers
         }).then(() => {
-          setChainState(data)
+          get_tokens(data.chainId).then(dt => {
+            data.tokens = dt;
+            setChainState(data);
+          });
         });
       // } else {
       //   setChainState(data)
@@ -262,11 +266,11 @@ function App() {
                   <AppTab onClick={DAOMenuOpen} icon={<Typography component="img" src={daoIcon} />} {...a11yProps(5)} />
                 </Tabs>
               </ThemeProvider>
-              {active && (() => {
+              {/* {active && (() => {
                 setChainState(connected.activeChain);
                 setWalletState(connected.activating);
               })
-              }
+              } */}
               <Stack direction="row" spacing={2}>
                 <Button sx={{ color: "white", borderRadius: "30px", background: "linear-gradient(93.42deg, rgba(211, 255, 33, 0.51) 0%, rgba(211, 255, 33, 0.1581) 100%)", p: "10px" }} onClick={(e) => chainMenuOpen(e, netIconState === 0 ? 1 : 0)}><Typography component="img" src={chainState.logo1} />&nbsp;<Typography sx={{ whiteSpace: "nowrap" }}>{chainState.name}</Typography>&nbsp;{netIconState === 0 ? <ExpandLessIcon /> : <ExpandMoreIcon />} </Button>
                 {active ?
@@ -393,29 +397,29 @@ function App() {
               <Grid container xs={12} md={9}>
                 <Grid xs={12} sm={6} md={3} container direction="column" alignItems="center" sx={{ padding: "15px" }}>
                   <HomeTypography2 variant='h5' gutterBottom align='center'>Receive our Newsletter</HomeTypography2>
-                  <HomeTypography2><Link href="#" underline="none">Liquidity Protocol</Link></HomeTypography2>
-                  <HomeTypography2><Link href="#" underline="none">Aggregation Protocol</Link></HomeTypography2>
-                  <HomeTypography2><Link href="#" underline="none">Limit Order Protocol</Link></HomeTypography2>
+                  <HomeTypography2><Link href="#" className='footer_link' underline="none">Liquidity Protocol</Link></HomeTypography2>
+                  <HomeTypography2><Link href="#" className='footer_link' underline="none">Aggregation Protocol</Link></HomeTypography2>
+                  <HomeTypography2><Link href="#" className='footer_link' underline="none">Limit Order Protocol</Link></HomeTypography2>
                 </Grid>
                 <Grid xs={12} sm={6} md={3} container direction="column" alignItems="center" sx={{ padding: "15px" }}>
                   <HomeTypography2 variant='h5' gutterBottom>Governance</HomeTypography2>
-                  <HomeTypography2><Link href="#" underline="none">1inch DAO</Link></HomeTypography2>
-                  <HomeTypography2><Link href="#" underline="none">1INCH token</Link></HomeTypography2>
-                  <HomeTypography2><Link href="#" underline="none">Forum</Link></HomeTypography2>
+                  <HomeTypography2><Link href="#" className='footer_link' underline="none">1inch DAO</Link></HomeTypography2>
+                  <HomeTypography2><Link href="#" className='footer_link' underline="none">1INCH token</Link></HomeTypography2>
+                  <HomeTypography2><Link href="#" className='footer_link' underline="none">Forum</Link></HomeTypography2>
                 </Grid>
                 <Grid xs={12} sm={6} md={3} container direction="column" alignItems="center" sx={{ padding: "15px" }}>
                   <HomeTypography2 variant='h5' gutterBottom>Support</HomeTypography2>
-                  <HomeTypography2><Link href="#" underline="none">Help center</Link></HomeTypography2>
-                  <HomeTypography2><Link href="#" underline="none">Press room</Link></HomeTypography2>
-                  <HomeTypography2><Link href="#" underline="none">Terms of service</Link></HomeTypography2>
-                  <HomeTypography2><Link href="#" underline="none">Privacy policy</Link></HomeTypography2>
+                  <HomeTypography2><Link href="#" className='footer_link' underline="none">Help center</Link></HomeTypography2>
+                  <HomeTypography2><Link href="#" className='footer_link' underline="none">Press room</Link></HomeTypography2>
+                  <HomeTypography2><Link href="#" className='footer_link' underline="none">Terms of service</Link></HomeTypography2>
+                  <HomeTypography2><Link href="#" className='footer_link' underline="none">Privacy policy</Link></HomeTypography2>
                 </Grid>
                 <Grid xs={12} sm={6} md={3} container direction="column" alignItems="center" sx={{ padding: "15px" }}>
                   <HomeTypography2 variant='h5' gutterBottom>Developers</HomeTypography2>
-                  <HomeTypography2><Link href="#" underline="none">Documentation</Link></HomeTypography2>
-                  <HomeTypography2><Link href="#" underline="none">GitHub</Link></HomeTypography2>
-                  <HomeTypography2><Link href="#" underline="none">Audit</Link></HomeTypography2>
-                  <HomeTypography2><Link href="#" underline="none">Bug bounty</Link></HomeTypography2>
+                  <HomeTypography2><Link href="#" className='footer_link' underline="none">Documentation</Link></HomeTypography2>
+                  <HomeTypography2><Link href="#" className='footer_link' underline="none">GitHub</Link></HomeTypography2>
+                  <HomeTypography2><Link href="#" className='footer_link' underline="none">Audit</Link></HomeTypography2>
+                  <HomeTypography2><Link href="#" className='footer_link' underline="none">Bug bounty</Link></HomeTypography2>
                 </Grid>
               </Grid>
             </Grid>

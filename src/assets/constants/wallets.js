@@ -75,13 +75,13 @@ import usdt from '../img/common/usdt.png';
 import usdc from '../img/common/usdc.png';
 // import weth from '../img/common/weth2.png';
 
-import eth_tokens from '../token-json/eth_token.json'
-import bsc_tokens from '../token-json/bsc_token.json'
-import polygon_tokens from '../token-json/polygon_token.json'
-import arbitrum_tokens from '../token-json/arbitrum_token.json'
-import avalanche_tokens from '../token-json/avalanche_token.json'
-import optimism_tokens from '../token-json/optimism_token.json'
-import fantom_tokens from '../token-json/fantom_token.json'
+// import eth_tokens from '../token-json/eth_token.json'
+// import bsc_tokens from '../token-json/bsc_token.json'
+// import polygon_tokens from '../token-json/polygon_token.json'
+// import arbitrum_tokens from '../token-json/arbitrum_token.json'
+// import avalanche_tokens from '../token-json/avalanche_token.json'
+// import optimism_tokens from '../token-json/optimism_token.json'
+// import fantom_tokens from '../token-json/fantom_token.json'
 
 // const [bscTokens, setBscTokens] = useState([]);
 // const [bscTokens, setBscTokens] = useState([]);
@@ -168,138 +168,144 @@ const Wallets = [
 ];
 let Chains = [
     {
-        chainId: 97,
+        test_chainId: 97,
+        chainId: 56,
         logo1: crypto7,
         logo2: Frame282,
         logo3: Crypto6,
         wallets: [Wallets[0]],
-        tokens: [
-            {chainId:97,address:"0xA1B71d61E071A6Cc277d13BEf2841CD8F363e017",name:"TestBSCToken1",symbol:"TBT1",decimals:18,logoURI:null},
-            {chainId:97,address:"0x27C449c03D8776Bcc9fbe7E9e9c1b2aFC5D5B87f",name:"TestBSCToken2",symbol:"TBT2",decimals:18,logoURI:null},
-            {chainId:97,address:"0x66712Cd82EE13eCaA7f2C8D9EC4DC0bC2f97ce25",name:"TestBSCToken3",symbol:"TBT3",decimals:18,logoURI:null},
-            {chainId:97,address:"0xb71dFe4530C870d428F480B3bd2a55B8eAB8E9f2",name:"TestBSCToken4",symbol:"TBT4",decimals:18,logoURI:null},
-            {chainId:97,address:"0x472217D927b9fA3a7Dbe3480716493803B3696D4",name:"TestBSCToken5",symbol:"TBT5",decimals:18,logoURI:null}
+        tokens: [],
+        // tokens: bsc_tokens.tokens,
+        test_tokens: [
+            { chainId: 97, address: "0xA1B71d61E071A6Cc277d13BEf2841CD8F363e017", name: "TestBSCToken1", symbol: "TBT1", decimals: 18, logoURI: null },
+            { chainId: 97, address: "0x27C449c03D8776Bcc9fbe7E9e9c1b2aFC5D5B87f", name: "TestBSCToken2", symbol: "TBT2", decimals: 18, logoURI: null },
+            { chainId: 97, address: "0x66712Cd82EE13eCaA7f2C8D9EC4DC0bC2f97ce25", name: "TestBSCToken3", symbol: "TBT3", decimals: 18, logoURI: null },
+            { chainId: 97, address: "0xCd2cC03f07bA28180fE26Ae288CFAa30f089EeF8", name: "LmabSwapToken", symbol: "LST", decimals: 9, logoURI: null },
+            { chainId: 97, address: "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee", name: "Binance USD", symbol: "BUSD", decimals: 18, logoURI: "https://assets.dex.guru/icons/0xe9e7cea3dedca5984780bafc599bd69add087d56-bsc.png" },
         ],
         swaps: [],
         name: 'BSC Mainnet',
         symbol: 'bsc'
     },
     {
-        chainId: 4,
+        // chainId: 4,
+        chainId: 1,
         logo1: ETH,
         logo2: Frame281,
         logo3: Crypto5,
         wallets: [Wallets[0]],
-        tokens: [
-            {chainId:4,address:"0x985Be8bB9Bc3421CdfD6fA40e6c8Ebfd84286681",name:"TestETHToken1",symbol:"TET1",decimals:18,logoURI:null},
-            {chainId:4,address:"0x7F95D140E90de5ed610c2f67DCc12De18058B444",name:"TestETHToken2",symbol:"TET2",decimals:18,logoURI:null},
-            {chainId:4,address:"0xbaf6600fDF66114717867fCC9d8E87bbc2ffC818",name:"TestETHToken3",symbol:"TET3",decimals:18,logoURI:null},
-            {chainId:4,address:"0xE0761b4665549e8a32c795DDEAF45d1D9ddE1935",name:"TestETHToken4",symbol:"TET4",decimals:18,logoURI:null},
-            {chainId:4,address:"0x5Fc2Cf88b8987ca21e879924D4aE8576Ad1D1d12",name:"TestETHToken5",symbol:"TET5",decimals:18,logoURI:null}
-        ],
+        tokens: [],
+        // tokens: eth_tokens.tokens,
+        // [
+        //     {chainId:4,address:"0x985Be8bB9Bc3421CdfD6fA40e6c8Ebfd84286681",name:"TestETHToken1",symbol:"TET1",decimals:18,logoURI:null},
+        //     {chainId:4,address:"0x7F95D140E90de5ed610c2f67DCc12De18058B444",name:"TestETHToken2",symbol:"TET2",decimals:18,logoURI:null},
+        //     {chainId:4,address:"0xbaf6600fDF66114717867fCC9d8E87bbc2ffC818",name:"TestETHToken3",symbol:"TET3",decimals:18,logoURI:null},
+        // ],
         swaps: [],
         name: 'Ethereum',
         symbol: 'eth'
     },
     {
-        chainId: 80001,
+        test_chainId: 80001,
+        chainId: 137,
         logo1: polygon,
         logo2: Frame283,
         logo3: Crypto,
         wallets: [Wallets[0]],
-        tokens: [
-            {chainId:80001,address:"0x98666E35D13968a2cdbdf98Cf3E92fD2a1256Aee",name:"TestPolyToken1",symbol:"TPT1",decimals:18,logoURI:null},
-            {chainId:80001,address:"0x4cB6b11C5a71cE6E2C0Dc76279F68B74dDac4287",name:"TestPolyToken2",symbol:"TPT2",decimals:18,logoURI:null},
-            {chainId:80001,address:"0xaA4FC897E1dd242386CC2Ba2F1258660CC2DFa11",name:"TestPolyToken3",symbol:"TPT3",decimals:18,logoURI:null},
-            {chainId:80001,address:"0x71fd501f0A917757A6F5b3D064E9f3ccBC3Db2dD",name:"TestPolyToken4",symbol:"TPT4",decimals:18,logoURI:null},
-            {chainId:80001,address:"0x2BD205797a15458cBD19EcdC2e87F47ce81252c4",name:"TestPolyToken5",symbol:"TPT5",decimals:18,logoURI:null}
+        tokens: [],
+        // tokens: polygon_tokens.tokens,
+        test_tokens: [
+            { chainId: 80001, address: "0x98666E35D13968a2cdbdf98Cf3E92fD2a1256Aee", name: "TestPolyToken1", symbol: "TPT1", decimals: 18, logoURI: null },
+            { chainId: 80001, address: "0x4cB6b11C5a71cE6E2C0Dc76279F68B74dDac4287", name: "TestPolyToken2", symbol: "TPT2", decimals: 18, logoURI: null },
+            { chainId: 80001, address: "0xaA4FC897E1dd242386CC2Ba2F1258660CC2DFa11", name: "TestPolyToken3", symbol: "TPT3", decimals: 18, logoURI: null },
+            { chainId: 80001, address: "0x18ffee6159E13108F873c5acb8D0977f3cCAE534", name: "LmabSwapToken", symbol: "LST", decimals: 9, logoURI: null },
+            { chainId: 80001, address: "0xf8B7Eb9fC632434d614444C358aecA2AE0C2a706", name: "USD Coin", symbol: "USDC", decimals: 18, logoURI: 'https://assets.dex.guru/icons/0x2791bca1f2de4661ed88a30c99a7a9449aa84174-polygon.png' },
         ],
         swaps: [],
         name: 'Polygon Network',
         symbol: 'polygon'
     },
     {
-        chainId: 138,
+        chainId: 42161,
         logo1: solana,
         logo2: Frame284,
         logo3: Crypto1,
         wallets: [Wallets[4]],
-        tokens: [
-            { name: "Avalanche", symbol:"AVAX", logoURI: avalanche },
-            { name: "Tether USD", symbol:"USDT", logoURI: usdt },
-            { name: "USD Coin", symbol:"USDC", logoURI: usdc }
-        ],
+        tokens: [],
         swaps: [],
         name: 'Solana',
         symbol: 'sol'
     },
     {
+        // chainId: 421611,
         chainId: 42161,
         logo1: Arbitrum,
         logo2: Frame285,
         logo3: Crypto8,
         wallets: [Wallets[0]],
-        tokens: arbitrum_tokens.tokens,
+        // tokens: arbitrum_tokens.tokens,
+        tokens: [],
         swaps: [],
         name: 'Arbitrum',
         symbol: 'arbitrum'
     },
     {
+        // chainId: 69,
         chainId: 10,
         logo1: optimism,
         logo2: Frame282_1,
         logo3: Crypto4,
         wallets: [Wallets[0]],
-        tokens: optimism_tokens.tokens,
+        tokens: [],
+        // tokens: optimism_tokens.tokens,
         swaps: [],
         name: 'Optimism',
         symbol: 'optimism'
     },
     {
-        chainId: 43113,
+        // chainId: 43113,
+        chainId: 43114,
         logo1: avalanche,
         logo2: Frame281_1,
         logo3: Crypto11,
         wallets: [Wallets[0]],
-        tokens: [
-            {chainId:43113,address:"0xCB1deAB9A0a0B5e19BdC876bDb96542bACBb2367",name:"TestAvaxToken1",symbol:"TAVT1",decimals:18,logoURI:null},
-            {chainId:43113,address:"0x3E685E032260F76067635Da49811D648d6C4735f",name:"TestAvaxToken2",symbol:"TAVT2",decimals:18,logoURI:null},
-            {chainId:43113,address:"0x7977fb35253aeD9368fd90194881CaE8dcf44AF2",name:"TestAvaxToken3",symbol:"TAVT3",decimals:18,logoURI:null},
-            {chainId:43113,address:"0x14f3BEECD7026B18ef9CEcCCC7dce88aef56ed14",name:"TestAvaxToken4",symbol:"TAVT4",decimals:18,logoURI:null},
-            {chainId:43113,address:"0x29Fe9Ec498C8cea19905AD8ea0234D3daC0B6B41",name:"TestAvaxToken5",symbol:"TAVT5",decimals:18,logoURI:null}
-        ],
+        tokens: [],
+        // tokens: avalanche_tokens.tokens,
+        // [
+        //     {chainId:43113,address:"0xCB1deAB9A0a0B5e19BdC876bDb96542bACBb2367",name:"TestAvaxToken1",symbol:"TAVT1",decimals:18,logoURI:null},
+        //     {chainId:43113,address:"0x3E685E032260F76067635Da49811D648d6C4735f",name:"TestAvaxToken2",symbol:"TAVT2",decimals:18,logoURI:null},
+        //     {chainId:43113,address:"0x7977fb35253aeD9368fd90194881CaE8dcf44AF2",name:"TestAvaxToken3",symbol:"TAVT3",decimals:18,logoURI:null},
+        // ],
         swaps: [],
         name: 'Avalanche',
         symbol: 'avalanche'
     },
     {
-        chainId: 4002,
+        // chainId: 4002,
+        chainId: 250,
         logo1: fantom,
         logo2: Frame283_1,
         logo3: Crypto3,
         wallets: [Wallets[0]],
-        tokens: [
-            {chainId:4002,address:"0x8f86F66D7c5E7b73E6AcF2c4f82F37b0f533C0d9",name:"TestFTMToken1",symbol:"TFT1",decimals:18,logoURI:null},
-            {chainId:4002,address:"0x0F605D0064e4A3609Adee6fc7CC21226CF4A0dd2",name:"TestFTMToken2",symbol:"TFT2",decimals:18,logoURI:null},
-            {chainId:4002,address:"0x566c1295714141da69eAD53feE19B16B8Bc0A006",name:"TestFTMToken3",symbol:"TFT3",decimals:18,logoURI:null},
-            {chainId:4002,address:"0x2423C9a8B910484Be622FdA3f9B86ffC14320930",name:"TestFTMToken4",symbol:"TFT4",decimals:18,logoURI:null},
-            {chainId:4002,address:"0x773a8D2F9bDd79c42ACdf4eECf0f941BAEfC9451",name:"TestFTMToken5",symbol:"TFT5",decimals:18,logoURI:null}
-        ],
+        tokens: [],
+        // tokens: fantom_tokens.tokens,
+        // [
+        //     {chainId:4002,address:"0x8f86F66D7c5E7b73E6AcF2c4f82F37b0f533C0d9",name:"TestFTMToken1",symbol:"TFT1",decimals:18,logoURI:null},
+        //     {chainId:4002,address:"0x0F605D0064e4A3609Adee6fc7CC21226CF4A0dd2",name:"TestFTMToken2",symbol:"TFT2",decimals:18,logoURI:null},
+        //     {chainId:4002,address:"0x566c1295714141da69eAD53feE19B16B8Bc0A006",name:"TestFTMToken3",symbol:"TFT3",decimals:18,logoURI:null},
+        // ],
         swaps: [],
         name: 'Fantom',
         symbol: 'fantom'
     },
     {
-        chainId: 65,
+        // chainId: 65,
+        chainId: 66,
         logo1: okex,
         logo2: Frame285_1,
         logo3: Crypto2,
         wallets: [Wallets[0]],
-        tokens: [
-            { name: "Okex", symbol:"OKX", logoURI:okex },
-            { name: "Tether USD", symbol:"USDT", logoURI: usdt },
-            { name: "USD Coin", symbol:"USDC", logoURI: usdc }
-        ],
+        tokens: [],
         swaps: [],
         name: 'Okex',
         symbol: 'okex'

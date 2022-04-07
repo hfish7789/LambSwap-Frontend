@@ -1,7 +1,11 @@
 a {
-  color: white !important;
   cursor: pointer;
 }
+
+.footer_link {
+  color: white !important;
+}
+
 input::-webkit-inner-spin-button {
   -webkit-appearance: none !important;
 }

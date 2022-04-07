@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { styled } from '@mui/material/styles';
+import PropTypes from 'prop-types';
 
 import {
   Paper,
@@ -7,9 +8,13 @@ import {
   Switch,
   Box,
   Link,
-  Typography
+  Typography,
+  Dialog,
+  DialogTitle,
+  IconButton
 } from '@mui/material';
 
+import CloseIcon from "@mui/icons-material/Close";
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
 import MuiAccordion from '@mui/material/Accordion';
 import MuiAccordionSummary from '@mui/material/AccordionSummary';
@@ -125,3 +130,41 @@ export const CAccordionSummary = styled((props) => (
 export const CAccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
   padding: theme.spacing(2)
 }));
+
+export const BootstrapDialog = styled(Dialog)(({ theme }) => ({
+  '& .MuiDialogContent-root': {
+      padding: theme.spacing(2),
+  },
+  '& .MuiDialogActions-root': {
+      padding: theme.spacing(1),
+  },
+}));
+
+export const BootstrapDialogTitle = (props) => {
+  const { children, onClose, ...other } = props;
+
+  return (
+      <DialogTitle sx={{ m: 0, p: 2 }} {...other}>
+          {children}
+          {onClose ? (
+              <IconButton
+                  aria-label="close"
+                  onClick={onClose}
+                  sx={{
+                      position: 'absolute',
+                      right: 8,
+                      top: 8,
+                      color: (theme) => theme.palette.grey[500],
+                  }}
+              >
+                  <CloseIcon />
+              </IconButton>
+          ) : null}
+      </DialogTitle>
+  );
+};
+
+BootstrapDialogTitle.propTypes = {
+  children: PropTypes.node,
+  onClose: PropTypes.func.isRequired,
+};

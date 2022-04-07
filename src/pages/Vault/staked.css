@@ -5,3 +5,35 @@
 .pool-filter-i .MuiButtonBase-root {
     color: #7E8B74 !important;
 }
+
+.stake-dialog .MuiPaper-root {
+    border-radius: 30px !important;
+}
+
+.stake-dialog .stake-paper {
+    border-radius: 20px !important;
+    background: #303030 !important;
+    padding: 20px;
+}
+
+.confirm-button {
+    border-radius: 20px !important;
+    background: linear-gradient(100.22deg, #34F14B 0%, #139F24 100%);
+    font-weight: 470 !important;
+    font-size: 18px !important;
+    color: white !important;
+    width: 100%;
+    margin-top: 15px !important;
+    padding: 10px !important;
+}
+
+.disable-button {
+    background: #37474f !important;
+    border-radius: 20px !important;
+    font-weight: 470 !important;
+    font-size: 18px !important;
+    color: white !important;
+    width: 100%;
+    margin-top: 15px !important;
+    padding: 10px !important;
+}

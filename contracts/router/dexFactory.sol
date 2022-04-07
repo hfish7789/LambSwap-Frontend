@@ -235,8 +235,8 @@ interface ILambSwapCallee {
 contract LambSwapERC20 is ILambSwapERC20 {
     using SafeMath for uint256;
 
-    string public constant name = "LambSwap ";
-    string public constant symbol = "Pancake-LP";
+    string public constant name = "LambSwap";
+    string public constant symbol = "LambSwap-LP";
     uint8 public constant decimals = 18;
     uint256 public totalSupply;
     mapping(address => uint256) public balanceOf;
