@@ -22,3 +22,12 @@ input::-webkit-inner-spin-button {
 .set_m .MuiPaper-root {
   border-radius: 20px;
 }
+
+.group-mark {
+  color: white;
+  height: 17px !important;
+  font-size: 10px !important;
+  font-weight: 600;
+  margin-top: -10px;
+  z-index: 1;
+}

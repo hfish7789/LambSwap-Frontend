@@ -66,7 +66,7 @@ import LinkIcon from '@mui/icons-material/Link';
 
 import { useWeb3React } from "@web3-react/core";
 import Cwallet from "./assets/constants/Cwallet";
-import { Chains, Connected, Wallets } from "./assets/constants/wallets";
+import { Chains, Wallets } from "./assets/constants/wallets";
 import Language from './assets/constants/language';
 import { get_tokens } from "./services/tokens/tokens.service";
 
@@ -148,7 +148,7 @@ function App() {
   const [chainMenuState, setChainMenuState] = useState(null);
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [walletState, setWalletState] = useState(Wallets[0]);
-  const { active, account } = useWeb3React();
+  const { active, account, chainId } = useWeb3React();
   const [DAOMenuState, setDAOMenuState] = useState(null);
   const [menuPage, setMenuPage] = useState(0);
   const [menuPage_1, setMenuPage_1] = useState(0);
@@ -157,12 +157,12 @@ function App() {
   const [stakedMenuState, setStakedMenuState] = useState(null);
   const [navMenuState, setNavMenuState] = useState(null);
   const [chainState, setChainState] = useState(Chains[0]);
-  
-  const connected = Connected();
-  useEffect(() => {
-    // console.log(Chains);
-    chainMenuClose(Chains[0]);
-  },[]);
+
+  // const connected = Connected();
+  useEffect(async () => {
+    let chain_data = await Chains.find((data) => (data.chainId === chainId));
+    chainMenuClose(chain_data);
+  }, [chainId]);
 
   const settingMenuOpen = (event) => {
     setSettingMenuState(event.currentTarget);
@@ -225,15 +225,15 @@ function App() {
     setNetIconState(0);
     if (data) {
       // if (active) {
-        await window.ethereum.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: `0x${Number(data.chainId).toString(16)}` }], // chainId must be in hexadecimal numbers
-        }).then(() => {
-          get_tokens(data.chainId).then(dt => {
-            data.tokens = dt;
-            setChainState(data);
-          });
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: `0x${Number(data.chainId).toString(16)}` }], // chainId must be in hexadecimal numbers
+      }).then(() => {
+        get_tokens(data.chainId).then(dt => {
+          data.tokens = dt;
+          setChainState(data);
         });
+      });
       // } else {
       //   setChainState(data)
       // }

@@ -19,7 +19,9 @@ import {
     Input,
 } from '@mui/material';
 
-import { TokenABI, StakingToken } from "../../config/abis/TokenABI";
+import { getBalance } from "../../config/app";
+import { TokenABI } from "../../config/abis/TokenABI";
+import { StakingToken } from "../../assets/constants/wallets"
 import { BootstrapDialog, BootstrapDialogTitle } from "../../config/style";
 import Web3 from 'web3';
 import { useWeb3React } from "@web3-react/core";
@@ -64,7 +66,6 @@ export default function vault({ chain }) {
 
     useEffect(async () => {
         let selectStaking = StakingToken.find((data) => (data.test_chainId === chainId));
-        alert();
         if (selectStaking) {
             setStaking(selectStaking);
             let LPInst = new web3.eth.Contract(TokenABI, selectStaking.test_LP_token);
@@ -79,17 +80,6 @@ export default function vault({ chain }) {
             setMaxLPAmount(getBalance(lp_balance, decimals));
         }
     }, [chainId]);
-
-    const getBalance = (balance, decimal) => {
-        if (balance.length < decimal + 1) {
-            for (let i = 0; i < decimal + 3 - balance.length; i++) {
-                balance = `0${balance}`;
-            }
-        }
-        let fixed_balance = balance.slice(0, -(decimal - 5));
-        let exact_balance = `${fixed_balance.slice(0, -5)}.${fixed_balance.slice(-5)}`;
-        return Number(exact_balance);
-    }
 
     const stakeDialogClose = () => {
         setStakeDialogState(false);

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Grid,
     Stack,
@@ -13,24 +13,21 @@ import {
     MenuItem,
     useMediaQuery,
     Container,
-    Avatar
+    Avatar,
+    Chip
 } from '@mui/material';
 
 import { useWeb3React } from "@web3-react/core";
-import Web3 from 'web3';
-import { CustomTab } from '../../config/style';
-
 import { styled } from '@mui/material/styles';
-// import { ThemeProvider } from '@emotion/react';
-import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
-import eth from '../../assets/img/common/eth.png';
-import Crypto9 from '../../assets/img/common/crypto-9.png';
-import Weth2 from '../../assets/img/common/weth2.png';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import { Chains } from "../../assets/constants/wallets";
+import { CrossPool, CrossPoolColor } from "../../assets/constants/wallets";
+import CrossPools from "./cross.pools";
+import { bridge_data } from "../../config/abis/bridge/bscBridge"
+import { getBalance } from "../../config/app";
+import { TokenABI } from "../../config/abis/TokenABI";
+import Cwallet from "../../assets/constants/Cwallet";
+import Web3 from 'web3';
 
 const HubPaper = styled(Paper)(() => ({
     margin: "20px 0",
@@ -43,76 +40,180 @@ const HubButton = styled(Button)(() => ({
     fontSize: "14px",
 }));
 
-const BorderLinearProgress = styled(LinearProgress)(() => ({
-    height: 7,
-    borderRadius: 5,
-    [`&.${linearProgressClasses.colorPrimary}`]: {
-        backgroundColor: "#7E8B74"
-    },
+const SwapButton = styled(Button)(() => ({
+    width: "100%",
+    color: "white",
+    fontWeight: "600",
+    fontSize: "16px",
+    borderRadius: "12px",
+    background: "linear-gradient(100.22deg, #34F14B 0%, #139F24 100%)"
 }));
 
 export default function hub({ chainState, tabValue, setTabValue }) {
     const matches600 = useMediaQuery('(min-width:600px)');
-    const matches900 = useMediaQuery('(min-width:900px)');
 
-    const [detailValue, setDetailValue] = React.useState();
-    const [iconState, setIconState] = React.useState(0);
-    const [token1, setToken1] = React.useState(chainState.tokens[0].symbol);
-    const [token2, setToken2] = React.useState(chainState.tokens[1].symbol);
+    const [token1, setToken1] = useState(chainState.bridge_tokens[0]);
+    const [token2, setToken2] = useState("select");
+    const [crossData, setCrossData] = useState();
+    const [pairData, setPairData] = useState();
+    const [inputAmount, setInputAmount] = useState();
+    const [token1Balance, setToken1Balance] = useState();
+    const [swapBtnState, setSwapBtnState] = useState();
+    const [isOpenDialog, setIsOpenDialog] = useState(false);
     const { active, account } = useWeb3React();
     const web3 = new Web3(window.ethereum);
     const BN = web3.utils.BN;
-    
-    React.useEffect(() => {
-        setToken1(chainState.tokens[0].symbol);
-        setToken2(chainState.tokens[1].symbol);
-    }, [chainState])
 
-    React.useEffect(() => {
+    useEffect(async () => {
+        setToken1(chainState.bridge_tokens[0]);
+        setToken2("select");
+        let data = [];
+        for (let i = 0; i < chainState.bridge_tokens[0]._num.length; i++) {
+            for (let k = 0; k < CrossPool[chainState.bridge_tokens[0]._num[i]].token_pair.length; k++) {
+                let filter = await data.find((data1) => (data1.address === CrossPool[chainState.bridge_tokens[0]._num[i]].token_pair[k].address));
+                if (!filter && chainState.bridge_tokens[0].address !== CrossPool[chainState.bridge_tokens[0]._num[i]].token_pair[k].address) {
+                    data.push(CrossPool[chainState.bridge_tokens[0]._num[i]].token_pair[k]);
+                }
+            }
+        }
+        setPairData(data);
+    }, [chainState]);
+
+    useEffect(async () => {
+        if (token2 === "select") {
+            setSwapBtnState(0);
+            return;
+        }
+
+        if (!inputAmount || inputAmount === '' || Number(inputAmount) <= 0) {
+            setSwapBtnState(1);
+            return;
+        }
+        let eth_balance = await web3.eth.getBalance(account);
+        if (eth_balance === '0') {
+            setSwapBtnState(2);
+            return;
+        }
+        let token1Inst = new web3.eth.Contract(TokenABI, token1.address);
+        let balance = await token1Inst.methods.balanceOf(account).call();
+        let balance_v2 = await getBalance(balance, token1.decimals);
+        if (!balance_v2 || balance_v2 < inputAmount) {
+            setSwapBtnState(3);
+            return;
+        }
+        let allowance = await token1Inst.methods.allowance(account, bridge_data.address).call();
+        let allowance_v2 = await getBalance(allowance, token1.decimals);
+        if (allowance_v2 && allowance_v2 >= inputAmount) {
+            setSwapBtnState(5);
+        } else {
+            setSwapBtnState(4);
+        }
+    }, [token1, token2, inputAmount]);
+
+    useEffect(async () => {
+        let token1Inst = new web3.eth.Contract(TokenABI, token1.address);
+        let balance1_v1 = await token1Inst.methods.balanceOf(account).call();
+        let balance1_v2 = await getBalance(balance1_v1, token1.decimals);
+        setToken1Balance(balance1_v2);
+    }, [token1, account]);
+
+    useEffect(() => {
         setTabValue(tabValue);
     }, [tabValue])
 
-    const [crossPools, setCrossPools] = React.useState([{
+    const [crossPools, setCrossPools] = useState([{
         tvl: 21.59,
         vol: 407.04,
         apy: 3.68,
         rewards: 407.04,
         pool: "ETH",
-        pool_info: "WETH (ERC-20) + ETH (BEP-20) + ETH (SPL-20) + ETH (ARC-20s)",
-        logo: Chains[1].logo3
     }]);
-    const array = [1, 1, 1, 1, 1, 1, 1, 1, 1];
-    const [liquidityItems, setLiquidityItems] = React.useState([1, 1, 1, 1, 1, 1]);
 
-    const hubPageChange = (newValue) => {
+    const hubPageChange = (newValue, data) => {
+        setCrossData(data);
         setTabValue(newValue);
     }
 
-    const more = (newValue, state) => {
-        if (newValue === detailValue) {
-            setIconState(state);
-        } else {
-            if (iconState === 1) {
-                setIconState(1);
-            } else {
-                setIconState(state);
+    const TokenChange1 = async (event) => {
+        setToken1(event.target.value);
+        let data = [];
+        for (let i = 0; i < event.target.value._num.length; i++) {
+            for (let k = 0; k < CrossPool[event.target.value._num[i]].token_pair.length; k++) {
+                let filter = await data.find((data1) => (data1.address === CrossPool[event.target.value._num[i]].token_pair[k].address));
+                if (!filter && event.target.value.address !== CrossPool[event.target.value._num[i]].token_pair[k].address) {
+                    data.push(CrossPool[event.target.value._num[i]].token_pair[k]);
+                }
             }
         }
-        setDetailValue(newValue);
-    }
-
-    const TokenChange1 = (event) => {
-        if (event.target.value === token2) {
-            setToken2(token1);
-        }
-        setToken1(event.target.value);
+        setToken2("select");
+        setPairData(data);
     };
     const TokenChange2 = (event) => {
-        if (event.target.value === token1) {
-            setToken1(token2);
-        }
         setToken2(event.target.value);
     };
+
+    const outputData = (e) => {
+        setInputAmount(e.target.value);
+    }
+
+    const tokenApprove = async () => {
+        let tokenInst = new web3.eth.Contract(TokenABI, token1.address);
+        let approve_amount = (new BN(inputAmount).mul(new BN(10).pow(new BN(token1.decimals)))).toString();
+        setSwapBtnState(6);
+        await tokenInst.methods.approve(bridge_data.address, approve_amount).send({
+            from: account
+        }, function (error) {
+            if (error) {
+                setSwapBtnState(4);
+            }
+        });
+        setSwapBtnState(5);
+    }
+
+    const tokenSwap = async () => {
+        try {
+            let bridgeInst = new web3.eth.Contract(bridge_data.abi, bridge_data.address);
+            let swap_amount = (new BN(inputAmount).mul(new BN(10).pow(new BN(token1.decimals)))).toString();
+            setSwapBtnState(6);
+            let deadline = new Date().valueOf() + 100000000;
+            let feeAmount = new BN(10).pow(new BN(15)).mul(new BN(2));
+            const params = [
+                token1.address,
+                1,
+                7,
+                "0x0298c2b32eaE4da002a15f36fdf7615BEa3DA047",
+                account,
+                swap_amount,
+                0,
+                feeAmount,
+                1
+            ]
+            // const gasAmount = await bridgeInst.methods.swap( ...params ).estimateGas({ from: account, value: web3.utils.toWei(feeAmount, 'wei') }); //.then(function (gasAmount) {
+
+            // console.log(gasAmount);
+            await bridgeInst.methods.swap(
+                token1.address,
+                1,
+                7,
+                "0x0298c2b32eaE4da002a15f36fdf7615BEa3DA047",
+                account,
+                swap_amount,
+                0,
+                0,
+                1
+            ).send({
+                from: account,
+                value: (0).toString(16)
+            }, function (error) {
+                if (error) {
+                    setSwapBtnState(5);
+                }
+            });
+            setSwapBtnState(4);
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
     return (
         <Box sx={{ background: "linear-gradient(45deg, rgba(12,38,16,1) 0%, rgba(6,23,11,0.9948354341736695) 20%, rgba(17,38,21,1) 64%, rgba(0,0,0,1) 100%)" }}>
@@ -123,9 +224,12 @@ export default function hub({ chainState, tabValue, setTabValue }) {
                             <Paper sx={{ background: "linear-gradient(279.93deg, #262626 0%, rgba(54, 51, 51, 0.14) 100%)", maxWidth: "100%", borderRadius: "14px", p: "26px 2.2%" }}>
                                 <Grid container justifyContent="space-between">
                                     <Grid xs={12} sm={5}>
-                                        <Stack direction="row" justifyContent="space-between">
-                                            <Typography sx={{ fontSize: "16px", color: "#7E8B74" }}>You pay</Typography>
-                                            <Typography sx={{ fontSize: "16px", color: "#7E8B74" }}>Balance: 0 ETH&nbsp;<Link underline='none' sx={{ color: "#34F14B !important" }}>max</Link></Typography>
+                                        <Stack direction="row" alignItems="center" justifyContent="space-between">
+                                            <Stack direction="row" alignItems="center" spacing={1}>
+                                                <Typography sx={{ fontSize: "16px", color: "#7E8B74" }}>You pay</Typography>
+                                                {token1 && <Chip size='small' className="group-mark" label={CrossPoolColor[token1.chainId].group_name} sx={{ background: `${CrossPoolColor[token1.chainId].text}` }} />}
+                                            </Stack>
+                                            <Typography sx={{ fontSize: "16px", color: "#7E8B74" }}>Balance: {token1Balance ? token1Balance : 0}&nbsp;{token1.symbol}&nbsp;<Link underline='none' sx={{ color: "#34F14B !important" }} onClick={() => setInputAmount(token1Balance)}>Max</Link></Typography>
                                         </Stack>
                                         <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2} sx={{ padding: "10px 0" }}>
                                             <Select
@@ -134,8 +238,8 @@ export default function hub({ chainState, tabValue, setTabValue }) {
                                                 onChange={TokenChange1}
                                                 sx={{ height: "55px" }}
                                             >
-                                                {chainState.tokens.slice(0, 20).map((data, index) => (
-                                                    <MenuItem value={data.symbol} key={index}>
+                                                {chainState.bridge_tokens.map((data, index) => (
+                                                    <MenuItem value={data} key={index}>
                                                         <Stack direction="row" alignItems="center" spacing={2} sx={{ padding: "4px" }}>
                                                             {data.logoURI !== null ?
                                                                 <Avatar src={data.logoURI} sx={{ width: "30px", height: "30px" }} />
@@ -147,7 +251,7 @@ export default function hub({ chainState, tabValue, setTabValue }) {
                                                     </MenuItem>
                                                 ))}
                                             </Select>
-                                            <Input className='swap_input' color="primary" placeholder='0.0' type='number' variant="standard" sx={{ color: "white", fontSize: "24px" }}></Input>
+                                            <Input className='swap_input' color="primary" placeholder='0.0' type='number' variant="standard" value={inputAmount} onChange={outputData} sx={{ color: "white", fontSize: "24px" }} />
                                         </Stack>
                                         <Typography align='right' sx={{ fontSize: "16px", color: "#7E8B74" }}>=$ --&nbsp;</Typography>
                                     </Grid>
@@ -163,7 +267,10 @@ export default function hub({ chainState, tabValue, setTabValue }) {
                                         </Grid>
                                     }
                                     <Grid xs={12} sm={5}>
-                                        <Typography sx={{ fontSize: "16px", color: "#7E8B74" }}>You will receive HRC-20</Typography>
+                                        <Stack direction="row" alignItems="center" spacing={1}>
+                                            <Typography sx={{ fontSize: "16px", color: "#7E8B74" }}>You will receive </Typography>
+                                            {token2 !== "select" && <Chip size='small' className="group-mark" label={CrossPoolColor[token2.chainId].group_name} sx={{ background: `${CrossPoolColor[token2.chainId].text}` }} />}
+                                        </Stack>
                                         <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2} sx={{ padding: "10px 0" }}>
                                             <Select
                                                 id="demo-simple-select-helper"
@@ -171,8 +278,9 @@ export default function hub({ chainState, tabValue, setTabValue }) {
                                                 onChange={TokenChange2}
                                                 sx={{ height: "55px" }}
                                             >
-                                                {chainState.tokens.slice(0, 20).map((data, index) => (
-                                                    <MenuItem value={data.symbol} key={index}>
+                                                <MenuItem value="select">Select</MenuItem>
+                                                {pairData && pairData.map((data, index) => (
+                                                    <MenuItem value={data} key={index}>
                                                         <Stack direction="row" alignItems="center" spacing={2} sx={{ padding: "4px" }}>
                                                             {data.logoURI !== null ?
                                                                 <Avatar src={data.logoURI} sx={{ width: "30px", height: "30px" }} />
@@ -180,6 +288,9 @@ export default function hub({ chainState, tabValue, setTabValue }) {
                                                                 <Avatar sx={{ width: "30px", height: "30px", color: "white" }}>{data.symbol.substring(0, 1)}</Avatar>
                                                             }
                                                             <Typography>{data.symbol}</Typography>
+                                                            {token2 !== data &&
+                                                                <Chip size='small' className="group-mark" label={CrossPoolColor[data.chainId].group_name} sx={{ background: `${CrossPoolColor[data.chainId].text}` }} />
+                                                            }
                                                         </Stack>
                                                     </MenuItem>
                                                 ))}
@@ -201,20 +312,43 @@ export default function hub({ chainState, tabValue, setTabValue }) {
                                         <Typography variant='p'>Max slippage: </Typography>
                                         <Typography variant='p' sx={{ color: "#34F14B" }}>1%</Typography>
                                     </Stack>
-                                    <Stack direction="row" justifyContent="space-between">
-                                        <Typography variant='p'>From:</Typography>
-                                        <Typography variant='p'>To:</Typography>
+                                    <Stack direction="row" justifyContent="space-between" spacing={2}>
+                                        <Stack direction="row" alignItems="center" spacing={1}>
+                                            <Typography>From:</Typography>
+                                            {active && <Avatar src={chainState.logo1} sx={{ width: "20px", height: "20px" }} />}
+                                            <Typography sx={{ color: "#34F14B" }}>{active && `${account.slice(0, 8)}...${account.slice(-8)}`}</Typography>
+                                        </Stack>
+                                        <Stack direction="row" alignItems="center" spacing={1}>
+                                            <Typography>To:</Typography>
+                                            {active && token2 !== "select" && <Avatar src={CrossPoolColor[token2.chainId].logo} sx={{ width: "20px", height: "20px" }} />}
+                                            <Typography sx={{ color: "#34F14B" }}>{active && token2 !== "select" && `${account.slice(0, 8)}...${account.slice(-8)}`}</Typography>
+                                        </Stack>
                                     </Stack>
                                 </Grid>
                             </Grid>
                             <Grid container justifyContent="center">
-                                <Button variant="contained" color='secondary' sx={{ color: "#B1BAB2", width: "30%", borderRadius: "12px", fontWeight: "700" }}>swap</Button>
+                                {
+                                    active ?
+                                        <Box sx={{ maxWidth: "350px", width: "100%" }}>
+                                            {swapBtnState === 0 && <SwapButton disabled={true} sx={{ background: "#37474f" }}>No select output token</SwapButton>}
+                                            {swapBtnState === 1 && <SwapButton disabled={true} sx={{ background: "#37474f" }}><Typography sx={{ color: "#78909c", py: "3px", fontWeight: "600" }}>Enter amount to swap</Typography></SwapButton>}
+                                            {swapBtnState === 2 && <SwapButton disabled={true} sx={{ background: "#37474f" }}><Typography sx={{ color: "#78909c", py: "3px", fontWeight: "600" }}>Insufficient balance to pay for gas</Typography></SwapButton>}
+                                            {swapBtnState === 3 && <SwapButton disabled={true} sx={{ background: "#37474f" }}><Typography sx={{ color: "#78909c", py: "3px", fontWeight: "600" }}>Insufficient {token1.symbol} balance</Typography></SwapButton>}
+                                            {swapBtnState === 4 && <SwapButton onClick={tokenApprove}>Give permission to use {token1.symbol}</SwapButton>}
+                                            {swapBtnState === 5 && <SwapButton onClick={tokenSwap}>swap</SwapButton>}
+                                            {swapBtnState === 6 && <SwapButton disabled={true}>Loading...</SwapButton>}
+                                        </Box>
+                                        :
+                                        <Box sx={{ maxWidth: "350px", width: "100%" }}>
+                                            <SwapButton onClick={() => setIsOpenDialog(true)}>Connect Wallet</SwapButton>
+                                        </Box>
+                                }
                             </Grid>
                         </Paper>
                         <Box sx={{ borderRadius: "14px", p: "4.34%" }}>
                             <Typography variant='h5' sx={{ color: "white", marginBottom: "30px" }}>Cross-chain&nbsp;Pool</Typography>
                             {
-                                array.map((data, index) => (
+                                CrossPool.map((data, index) => (
                                     <HubPaper key={index} elevation={12} sx={{ overflow: "auto" }}>
                                         <Grid container direction="row" sx={{ minWidth: "700px" }}>
                                             <Grid container xs={10} sx={{ p: "2%" }}>
@@ -240,26 +374,32 @@ export default function hub({ chainState, tabValue, setTabValue }) {
                                                 <Grid xs={12} sx={{ color: "#7E8B74" }}>
                                                     <Stack direction="row" justifyContent="space-between" alignItems="center">
                                                         <Stack direction="row" alignItems='center'>
-                                                            <Typography component="img" src={eth}></Typography>
-                                                            <Typography sx={{ color: "#34F14B", fontSize: "14px" }}>&nbsp;{crossPools[0].pool}-Pool:&nbsp;</Typography>
-                                                            <Typography sx={{ fontSize: "14px" }}>{crossPools[0].pool_info}</Typography>
+                                                            <Avatar sx={{ width: "26px", height: "26px" }} src={data.logo2} />
+                                                            <Typography sx={{ color: "#34F14B", fontSize: "14px" }}>&nbsp;{data.name}:&nbsp;</Typography>
+                                                            <Typography sx={{ fontSize: "14px" }}>{data.token_pair.map((data1, index1) => {
+                                                                if (index1 + 1 === data.token_pair.length) {
+                                                                    return (`${data1.symbol} (${data1.group_name}) + `).slice(0, -2);
+                                                                } else {
+                                                                    return `${data1.symbol} (${data1.group_name}) + `;
+                                                                }
+                                                            })}</Typography>
                                                         </Stack>
                                                         <Stack direction="row" spacing={0.5}>
-                                                            <HubButton size="small" sx={{ background: "rgba(52, 241, 75, 0.06)", margin: "0 10px", color: "#34F14B" }} onClick={() => hubPageChange(0)}>Deposit</HubButton>
-                                                            <HubButton size="small" sx={{ background: "rgba(40, 73, 175, 0.21)", color: "#4C6DD1" }} onClick={() => hubPageChange(1)}>Withdraw</HubButton>
+                                                            <HubButton size="small" sx={{ background: "rgba(52, 241, 75, 0.06)", margin: "0 10px", color: "#34F14B" }} onClick={() => hubPageChange(0, data)}>Deposit</HubButton>
+                                                            <HubButton size="small" sx={{ background: "rgba(40, 73, 175, 0.21)", color: "#4C6DD1" }} onClick={() => hubPageChange(1, data)}>Withdraw</HubButton>
                                                         </Stack>
                                                     </Stack>
                                                 </Grid>
                                             </Grid>
                                             <Grid container xs={2} justifyContent="flex-end" alignItems="flex-end">
-                                                <Typography component="img" src={Chains[index].logo3} sx={{ maxWidth: "100%" }}></Typography>
+                                                <Typography component="img" src={data.logo1} sx={{ maxWidth: "100%" }}></Typography>
                                             </Grid>
                                         </Grid>
                                     </HubPaper>
                                 ))
                             }
                         </Box>
-                        <Paper sx={{ background: "#232121", borderRadius: "14px", p: "2.48%", mt: "145px" }}>
+                        <Paper sx={{ background: "#232121", borderRadius: "14px", p: "2.48%" }}>
                             <Grid container direction='column'>
                                 <Typography sx={{ color: "white", p: "0 0 18px" }}>Total Pool Deposits & Daily Volume</Typography>
                                 <Typography gutterBottom variant='p' sx={{ color: "#7E8B74" }}>Total&nbsp;pool&nbsp;deposit: $ 75,790,000,000</Typography>
@@ -269,177 +409,9 @@ export default function hub({ chainState, tabValue, setTabValue }) {
                     </Container>
                 </Box>
                 :
-                <Box sx={{ p: "7.3% " }}>
-                    <Paper sx={{ background: "#232121", p: "26px", borderRadius: "20px", overflow: "auto" }}>
-                        <Grid container sx={{ minWidth: "500px" }}>
-                            <Grid xs={4} direction="column">
-                                <Stack direction="row" sx={{ color: "#7E8B74" }}>
-                                    <Typography sx={{ color: "#34F14B" }}>LP-ETH</Typography>&nbsp;BALANCE
-                                </Stack>
-                                <Typography sx={{ color: "white" }}>--</Typography>
-                                <Typography sx={{ color: "#7E8B74" }}>=＄ --</Typography>
-                            </Grid>
-                            <Grid xs={4} direction="column">
-                                <Stack direction="row" sx={{ color: "#7E8B74" }}>
-                                    <Typography sx={{ color: "#34F14B" }}>LP-ETH</Typography>&nbsp;STAKED
-                                </Stack>
-                                <Typography sx={{ color: "white" }}>--</Typography>
-                                <Typography sx={{ color: "#7E8B74" }}>=＄ --</Typography>
-                            </Grid>
-                            <Grid xs={4} direction="column">
-                                <Stack direction="row" sx={{ color: "#7E8B74" }}>
-                                    <Typography sx={{ color: "#34F14B" }}>LST</Typography>&nbsp;EARNED
-                                </Stack>
-                                <Typography sx={{ color: "white" }}>--</Typography>
-                                <Typography sx={{ color: "#7E8B74" }}>=＄ --</Typography>
-                            </Grid>
-                        </Grid>
-                    </Paper>
-                    <Paper sx={{ background: "#232121", borderRadius: "14px", margin: "68px 0", px: "5%" }}>
-                        <Stack direction="row" justifyContent="space-around">
-                            <CustomTab text={["Add Liquidity", "Remove Liquidity"]} padding={20} tabValue={tabValue} setTabValue={setTabValue} position={"top"} />
-                        </Stack>
-                        {tabValue === 0 &&
-                            <Box>
-                                {liquidityItems.map((data, index) => (
-                                    <HubPaper sx={{ p: "25px 34px", overflow: "auto" }} key={index}>
-                                        <Grid container justifyContent="space-between" sx={{ minWidth: "580px" }}>
-                                            <Grid xs={5.5}>
-                                                <Stack direction="row" alignItems="center" justifyContent="space-between">
-                                                    <Stack direction="row" alignItems="center">
-                                                        <Typography component="img" src={Weth2}></Typography>&nbsp;
-                                                        <Typography sx={{ color: "white" }}>WETH</Typography>
-                                                    </Stack>
-                                                    <Stack direction="row" alignItems="center">
-                                                        <Input className='swap_input' placeholder="0.0" color="primary" type='number' variant="standard" sx={{ color: "white", fontSize: "18px" }}></Input>&nbsp;
-                                                        <Button size="small" sx={{ background: "rgba(52, 241, 75, 0.06)", margin: "0 10px", color: "#34F14B" }}>max</Button>
-                                                    </Stack>
-                                                </Stack>
-                                            </Grid>
-                                            <Divider orientation="vertical" flexItem>
-                                            </Divider>
-                                            <Grid xs={5.5}>
-                                                <Stack direction="row" alignItems="center" justifyContent="space-between">
-                                                    <Stack direction="column">
-                                                        <Typography sx={{ color: "#7E8B74" }}>Balance</Typography>
-                                                        <Typography sx={{ color: "#7E8B74" }}>--</Typography>
-                                                    </Stack>
-                                                    <Stack direction="row" alignItems="center">
-                                                        <HubButton size="small" sx={{ background: "rgba(52, 241, 75, 0.06)", margin: "0 10px", color: "#34F14B" }}>Deposit</HubButton>
-                                                        <Button sx={{ background: "rgba(126, 139, 116, 0.22)", borderRadius: "12px", minWidth: "0 !important" }} size="small" onClick={() => more(index, iconState === 0 ? 1 : 0)} >{detailValue === index ? iconState === 0 ? <ExpandMoreIcon /> : <ExpandLessIcon /> : <ExpandMoreIcon />} </Button>
-                                                    </Stack>
-                                                    <Stack direction="column">
-                                                        <Typography sx={{ color: "#7E8B74" }}>Pay LP</Typography>
-                                                        <Typography sx={{ color: "#7E8B74" }}>--</Typography>
-                                                    </Stack>
-                                                </Stack>
-                                            </Grid>
-                                        </Grid>
-                                        {
-                                            (detailValue === index && iconState === 1) &&
-                                            <Grid sx={{ p: "25px 0 0", width: "30%" }}>
-                                                <Typography sx={{ color: "#7E8B74" }}>Poly Fee</Typography>
-                                                <Stack direction="row" justifyContent="space-between">
-                                                    <Typography sx={{ color: "#7E8B74" }}>From:</Typography>
-                                                    <Typography sx={{ color: "#7E8B74" }}>To:</Typography>
-                                                </Stack>
-                                            </Grid>
-                                        }
-                                    </HubPaper>
-                                ))
-                                }
-                            </Box>
-                        }
-                        {tabValue === 1 &&
-                            <Box>
-                                {liquidityItems.map((data, index) => (
-                                    <HubPaper sx={{ p: "25px 34px", overflow: "auto" }} key={index}>
-                                        <Grid container justifyContent="space-between" sx={{ minWidth: "580px" }}>
-                                            <Grid xs={5.5}>
-                                                <Stack direction="row" alignItems="center" justifyContent="space-between">
-                                                    <Stack direction="row" alignItems="center">
-                                                        <Typography component="img" src={Weth2}></Typography>&nbsp;
-                                                        <Typography sx={{ color: "white" }}>WETH</Typography>
-                                                    </Stack>
-                                                    <Stack direction="row" alignItems="center">
-                                                        <Input className='swap_input' placeholder="0.0" color="primary" type='number' variant="standard" sx={{ color: "white", fontSize: "18px" }}></Input>&nbsp;
-                                                        <Button size="small" sx={{ background: "rgba(52, 241, 75, 0.06)", margin: "0 10px", color: "#34F14B" }}>max</Button>
-                                                    </Stack>
-                                                </Stack>
-                                            </Grid>
-                                            <Divider orientation="vertical" flexItem>
-                                            </Divider>
-                                            <Grid xs={5.5}>
-                                                <Stack direction="row" alignItems="center" justifyContent="space-between">
-                                                    <Stack direction="column">
-                                                        <Typography sx={{ color: "#7E8B74" }}>Balance</Typography>
-                                                        <Typography sx={{ color: "#7E8B74" }}>--</Typography>
-                                                    </Stack>
-                                                    <Stack direction="row" alignItems="center">
-                                                        <HubButton size="small" sx={{ background: "rgba(40, 73, 175, 0.21)", margin: "0 10px", color: "#4C6DD1" }}>withdraw</HubButton>
-                                                        <Button sx={{ background: "rgba(126, 139, 116, 0.22)", borderRadius: "12px", minWidth: "0 !important", color: "#4C6DD1" }} size="small" onClick={() => more(index, iconState === 0 ? 1 : 0)} >{detailValue === index ? iconState === 0 ? <ExpandMoreIcon /> : <ExpandLessIcon /> : <ExpandMoreIcon />} </Button>
-                                                    </Stack>
-                                                    <Stack direction="column">
-                                                        <Typography sx={{ color: "#7E8B74" }}>Pay LP</Typography>
-                                                        <Typography sx={{ color: "#7E8B74" }}>--</Typography>
-                                                    </Stack>
-                                                </Stack>
-                                            </Grid>
-                                        </Grid>
-                                        {
-                                            detailValue === index && iconState === 1 &&
-                                            <Grid sx={{ p: "25px 0 0", width: "30%" }}>
-                                                <Typography sx={{ color: "#7E8B74" }}>Poly Fee</Typography>
-                                                <Stack direction="row" justifyContent="space-between">
-                                                    <Typography sx={{ color: "#7E8B74" }}>From:</Typography>
-                                                    <Typography sx={{ color: "#7E8B74" }}>To:</Typography>
-                                                </Stack>
-                                            </Grid>
-                                        }
-                                    </HubPaper>
-                                ))
-                                }
-                            </Box>
-                        }
-                        <Stack direction="row" justifyContent="right" sx={{ p: "10px 0 50px" }}>
-                            <Typography sx={{ color: "#7E8B74" }}>Max slippage&nbsp;:&nbsp;</Typography>
-                            <Typography sx={{ color: "#34F14B" }}>1%</Typography>
-                        </Stack>
-                    </Paper>
-                    <Paper sx={{ borderRadius: "14px", background: "#232121" }}>
-                        <Grid container>
-                            <Grid xs={12} sm={7}>
-                                <Stack direction="column" sx={{ p: `0 ${matches900 ? `90px` : `5%`} 32px` }}>
-                                    <Stack direction="row" sx={{ p: "16px 0" }}>
-                                        <Typography sx={{ color: "#7E8B74" }}>WETH&nbsp;+&nbsp;ETH&nbsp;+&nbsp;ETH&nbsp;:</Typography>
-                                        <Typography sx={{ color: "white" }}>7,819,16</Typography>
-                                    </Stack>
-                                    {liquidityItems.map((data, index) => (
-                                        <Stack direction="row" sx={{ p: "6px 0" }} key={index}>
-                                            <Typography component="img" src={Weth2}></Typography>&nbsp;
-                                            <Stack direction="column">
-                                                <Stack direction="row">
-                                                    <Typography variant='p' sx={{ color: "#7E8B74" }}>WETH:</Typography>
-                                                    <Typography variant='p' sx={{ color: "white" }}>&nbsp;2,851.18&nbsp;</Typography>
-                                                    <Typography variant='p' sx={{ color: "#7E8B74" }}>({36.464}%)</Typography>
-                                                </Stack>
-                                                <BorderLinearProgress variant="determinate" value={36.464} />
-                                            </Stack>
-                                        </Stack>
-                                    ))
-                                    }
-                                </Stack>
-                            </Grid>
-                            {!matches600 &&
-                                <Grid xs={6} sm={0}></Grid>
-                            }
-                            <Grid container xs={6} sm={5} justifyContent="flex-end" alignItems="flex-end" sx={{ minHeight: "200px" }}>
-                                <Typography component="img" src={Crypto9} sx={{ maxWidth: "100%" }}></Typography>
-                            </Grid>
-                        </Grid>
-                    </Paper>
-                </Box>
+                <CrossPools tabValue={tabValue} setTabValue={setTabValue} crossData={crossData} />
             }
+            <Cwallet isOpen={isOpenDialog} setIsOpen={setIsOpenDialog} chain={chainState} />
         </Box>
     )
 }

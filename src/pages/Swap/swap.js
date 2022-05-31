@@ -15,7 +15,8 @@ import {
     Chip,
     Avatar,
     Alert,
-    Collapse
+    Collapse,
+    Link
     // CircularProgress
     // SvgIcon
 } from '@mui/material';
@@ -33,6 +34,7 @@ import { styled, createTheme } from '@mui/material/styles';
 import { ThemeProvider } from '@emotion/react';
 import { useWeb3React } from "@web3-react/core";
 import Cwallet from "../../assets/constants/Cwallet";
+import { getBalance } from "../../config/app";
 
 import './swap.css';
 import { Router_address } from "../../config/abis/router/dexRouter";
@@ -87,12 +89,13 @@ export default function Swap({ chainState, setChainState }) {
     const [swapSelectState, setSwapSelectState] = useState(false);
     const [dexsOrder, setDexsOrder] = useState();
     const [swapSelectData, setSwapSelectData] = useState(0);
-    const input_amount = useRef();
     const [swapBtnState, setSwapBtnState] = useState(0);
     const [routerAddress, setRouterAddress] = useState(Router_address[0].dexs);
     const [factoryAddress, setFactoryAddress] = useState(Factory_address[0].dexs);
     const [maxAmount, setMaxAmount] = useState();
-    const [importAlert, setImportAlert] = React.useState({ state1: false, state2: "success", data: "" });
+    const [importAlert, setImportAlert] = useState({ state1: false, state2: "success", data: "" });
+    const [rateState, setRateState] = useState(0);
+    const [slippage, setSlippage] = useState(1);
 
     // const [progress, setProgress] = React.useState(0);
 
@@ -107,9 +110,16 @@ export default function Swap({ chainState, setChainState }) {
         }
     }, [importAlert]);
 
-    useEffect(() => {
+    useEffect(async () => {
+        setSwapSelectData(0);
+        let select_router = await Router_address.find(data => (data.chainId === chainState.chainId)).dexs;
+        let select_factory = await Factory_address.find(data => (data.chainId === chainState.chainId)).dexs;
+        console.log(select_router);
+        setRouterAddress(select_router);
+        setFactoryAddress(select_factory);
         axios.get(`https://api.dex.guru/v2/tokens/search/${chainState.tokens[0].address}?network=${chainState.symbol}`).then(res => {
             if (res.data.data.length) {
+                console.log(res.data.data[0]);
                 setToken1(res.data.data[0]);
             }
         });
@@ -118,15 +128,11 @@ export default function Swap({ chainState, setChainState }) {
                 setToken2(res.data.data[0]);
             }
         });
-        let select_router = Router_address.find(data => (data.chainId === chainState.chainId)).dexs;
-        let select_factory = Factory_address.find(data => (data.chainId === chainState.chainId)).dexs;
-        setRouterAddress(select_router);
-        setFactoryAddress(select_factory);
     }, [chainState]);
 
     useEffect(async () => {
-        if (input_amount.current.value && input_amount.current.value > 0) {
-            setSwapAmount(input_amount.current.value);
+        if (maxAmount && maxAmount > 0) {
+            setSwapAmount(maxAmount);
         }
         let token1Inst = new web3.eth.Contract(TokenABI, token1.address);
         let token2Inst = new web3.eth.Contract(TokenABI, token2.address);
@@ -136,7 +142,7 @@ export default function Swap({ chainState, setChainState }) {
         let balance2_v2 = await getBalance(balance2_v1, token2.decimals);
         setToken1Balance(balance1_v2 ? balance1_v2 : 0);
         setToken2Balance(balance2_v2 ? balance2_v2 : 0);
-    }, [token1, token2])
+    }, [token1, token2, account])
 
     let num = 0;
     useEffect(() => {
@@ -180,9 +186,8 @@ export default function Swap({ chainState, setChainState }) {
 
     useEffect(() => {
         const t = setTimeout(() => {
-            setSwapAmount(input_amount.current.value);
-            console.log(111111);
-        }, 7000);
+            setSwapAmount(maxAmount);
+        }, 10000);
 
         return () => {
             clearTimeout(t)
@@ -258,17 +263,6 @@ export default function Swap({ chainState, setChainState }) {
         }
     };
 
-    const getBalance = (balance, decimal) => {
-        if (balance.length < 19) {
-            for (let i = 0; i < decimal + 3 - balance.length; i++) {
-                balance = `0${balance}`;
-            }
-        }
-        let fixed_balance = balance.slice(0, -(decimal - 5));
-        let exact_balance = `${fixed_balance.slice(0, -5)}.${fixed_balance.slice(-5)}`;
-        return Number(exact_balance);
-    }
-
     const TokenSelect3 = (event) => {
         setToken3(event.target.value);
     };
@@ -298,51 +292,40 @@ export default function Swap({ chainState, setChainState }) {
     }
 
     const setSwapAmount = async (newValue) => {
-        // setMaxAmount(newValue);
         if (!newValue || newValue <= 0) {
             setDexsOrder();
             return false;
         }
-        let token1Inst = new web3.eth.Contract(TokenABI, token1.address);
-        let token2Inst = new web3.eth.Contract(TokenABI, token2.address);
         newValue = (new BN(newValue).mul(new BN(10).pow(new BN(token1.decimals)))).toString();
         let dexs_amountOuts = [];
         for (let i = 0; i < routerAddress.length; i++) {
-            let dexs_amountOut = { amountOut: "0", num: 0 };
+            let dexs_amountOut = { amountOut: "0", num: i };
             let routerInsts = new web3.eth.Contract(routerAddress[i].abi, routerAddress[i].address);
-            let factoryInsts = new web3.eth.Contract(factoryAddress[i].abi, factoryAddress[i].address);
-            let balances1 = 0;
-            let balances2 = 0;
-            dexs_amountOut.num = i;
-            let pairs;
-            if (routerAddress[i].address === '0x546C79662E028B661dFB4767664d0273184E4dD1') {
-                let position = await factoryInsts.methods.getPoolsLength(token1.address, token2.address).call();
-                pairs = await factoryInsts.methods.getPoolAtIndex(token1.address, token2.address, position).call();
-            } else {
-                pairs = await factoryInsts.methods.getPair(token1.address, token2.address).call();
-            }
-            if (pairs !== "0x0000000000000000000000000000000000000000" && pairs) {
-                balances1 = await token1Inst.methods.balanceOf(pairs).call();
-                balances2 = await token2Inst.methods.balanceOf(pairs).call();
-            } else {
-                dexs_amountOuts.push(dexs_amountOut);
-                continue;
-            }
-
-            if (routerAddress[i].address === '0x3a6d8cA21D1CF76F653A67577FA0D27453350dD8') {
-                dexs_amountOut.amountOut = await routerInsts.methods.getAmountOut(
-                    newValue,
-                    balances1,
-                    balances2,
-                    '2'
-                ).call();
-            } else {
-                dexs_amountOut.amountOut = await routerInsts.methods.getAmountOut(
-                    newValue,
-                    balances1,
-                    balances2
-                ).call();
-            }
+            // let amountOut;
+            // if (routerAddress[i].address === "0x546C79662E028B661dFB4767664d0273184E4dD1") {
+            //     let factoryInsts = new web3.eth.Contract(factoryAddress[i].abi, factoryAddress[i].address);
+            //     let pair = await factoryInsts.methods.getPools(
+            //         token1.address,
+            //         token2.address
+            //     ).call(function (err) {
+            //         console.log(err)
+            //     });
+            //     amountOut = await routerInsts.methods.getAmountsOut(
+            //         newValue,
+            //         [pair[0]],
+            //         [token1.address, token2.address]
+            //     ).call(function (err) {
+            //         if (err) {
+            //             return false;
+            //         }
+            //     });
+            // } else {
+            let amountOut = await routerInsts.methods.getAmountsOut(
+                newValue,
+                [token1.address, token2.address]
+            ).call();
+            // }
+            dexs_amountOut.amountOut = amountOut[1];
             dexs_amountOut.amountOut = await getBalance(dexs_amountOut.amountOut, token2.decimals);
             dexs_amountOuts.push(dexs_amountOut);
         }
@@ -359,17 +342,21 @@ export default function Swap({ chainState, setChainState }) {
 
     const tokenApprove = async () => {
         let tokenInst = new web3.eth.Contract(TokenABI, token1.address);
-        let approve_amount = (new BN(input_amount.current.value).mul(new BN(10).pow(new BN(token1.decimals)))).toString();
+        let approve_amount = (new BN(maxAmount).mul(new BN(10).pow(new BN(token1.decimals)))).toString();
         setSwapBtnState(6);
         await tokenInst.methods.approve(routerAddress[dexsOrder[swapSelectData].num].address, approve_amount).send({
             from: account
+        }, function (error) {
+            if (error) {
+                setSwapBtnState(4);
+            }
         });
         setSwapBtnState(5);
     }
 
     const tokenSwap = async () => {
         let swapPath = [token1.address, token2.address];
-        let swap_amount = (new BN(input_amount.current.value).mul(new BN(10).pow(new BN(token1.decimals)))).toString();
+        let swap_amount = (new BN(maxAmount).mul(new BN(10).pow(new BN(token1.decimals)))).toString();
 
         let deadline = new Date().valueOf() + 10000000;
         setSwapBtnState(6);
@@ -382,6 +369,10 @@ export default function Swap({ chainState, setChainState }) {
             deadline
         ).send({
             from: account
+        }, function (error) {
+            if (error) {
+                setSwapBtnState(5);
+            }
         });
         setSwapBtnState(4);
     }
@@ -444,7 +435,7 @@ export default function Swap({ chainState, setChainState }) {
                                                             <Avatar src={token1.logoURI} sx={{ width: "30px", height: "30px" }} />
                                                             :
                                                             <Avatar sx={{ width: "30px", height: "30px", color: "white" }}>{token1.symbol.substring(0, 1)}</Avatar>} endIcon={<ExpandMoreIcon />} sx={{ fontSize: "16px", color: "white" }} onClick={() => setTokenDialogState(1)}>{token1.symbol}</Button>
-                                                        <Input className='swap_input' color="primary" placeholder='0.0' type='number' variant="standard" inputRef={input_amount} value={maxAmount} onChange={(e) => setSwapAmount(e.target.value, setMaxAmount(e.target.value))} sx={{ color: "white", fontSize: "20px" }} />
+                                                        <Input className='swap_input' color="primary" placeholder='0.0' type='number' variant="standard" value={maxAmount} onChange={(e) => setSwapAmount(e.target.value, setMaxAmount(e.target.value))} sx={{ color: "white", fontSize: "20px" }} />
                                                     </Stack>
                                                     <Stack direction="row" justifyContent="space-between" sx={{ color: "#34F14B" }}>
                                                         <Typography sx={{ fontSize: "14px" }}>{token1.name}</Typography>
@@ -485,11 +476,13 @@ export default function Swap({ chainState, setChainState }) {
                                                     {dexsOrder && dexsOrder.length > 1 &&
                                                         <Box>
                                                             <Paper sx={{ margin: "0 0 8px", cursor: "pointer", background: "#161714", color: "white", border: `1px solid ${swapSelectData === 1 ? "#34F14B" : "#7E8B74"}`, borderRadius: "12px" }}
-                                                                onClick={() => setDexsOrder([dexsOrder[0], dexsOrder[1], dexsOrder[2]], setSwapSelectData(1))}>
+                                                                onClick={() => setDexsOrder(dexsOrder.length > 2 ? [dexsOrder[0], dexsOrder[1], dexsOrder[2]] : [dexsOrder[0], dexsOrder[1]], setSwapSelectData(1))}>
                                                                 <Stack direction="column" sx={{ p: "14px 8px", color: `${swapSelectData !== 1 && "#7E8B74"}` }}>
                                                                     <Stack direction="row" justifyContent="space-between">
                                                                         <Stack direction="row" spacing={1} onClick={() => setSwapSelectState(dexsOrder.length > 2 ? swapSelectState ? false : true : false)}>
-                                                                            <Typography gutterBottom>{routerAddress[dexsOrder[1].num].name}</Typography>
+                                                                            <Typography gutterBottom>
+                                                                                {routerAddress.length - 1 >= dexsOrder[1].num && routerAddress[Number(dexsOrder[1].num)].name}
+                                                                            </Typography>
                                                                             {dexsOrder.length > 2 &&
                                                                                 <ExpandMoreIcon />
                                                                             }
@@ -506,7 +499,7 @@ export default function Swap({ chainState, setChainState }) {
                                                                 <Paper sx={{ margin: "0 0 8px", cursor: "pointer", background: "#161714", color: "white", border: "1px solid #7E8B74", borderRadius: "12px" }} onClick={() => setDexsOrder([dexsOrder[0], dexsOrder[2], dexsOrder[1]], setSwapSelectState(false))}>
                                                                     <Stack direction="column" sx={{ p: "14px 8px", color: "#7E8B74" }}>
                                                                         <Stack direction="row" justifyContent="space-between">
-                                                                            <Typography gutterBottom>{routerAddress[dexsOrder[2].num].name}</Typography>
+                                                                            <Typography gutterBottom>{routerAddress[Number(dexsOrder[2].num)].name}</Typography>
                                                                             <Typography gutterBottom>{dexsOrder[2].amountOut}</Typography>
                                                                         </Stack>
                                                                         <Stack direction="row" justifyContent="space-between">
@@ -589,31 +582,57 @@ export default function Swap({ chainState, setChainState }) {
                                 </Box>
                             </SwapPaper>
                             <Stack direction="column" sx={{ maxWidth: "476px", width: "100%", m: "20px 0 230px" }} spacing={1}>
-                                <Stack direction="row" justifyContent="space-between" alignItems="center">
-                                    <Stack direction="row" spacing={1} alignItems="center">
-                                        <Typography sx={{ fontSize: "14px" }}>Rate</Typography>
-                                        <ExpandMoreIcon />
+                                {rateState === 0 ?
+                                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                        <Link underline='none' sx={{ color: "white" }} onClick={() => setRateState(1)}>
+                                            <Stack direction="row" spacing={1} alignItems="center">
+                                                <Typography sx={{ fontSize: "14px" }}>Rate</Typography>
+                                                <ExpandMoreIcon />
+                                            </Stack>
+                                        </Link>
+                                        <Stack direction="row" spacing={1} alignItems="center">
+                                            <Typography sx={{ fontSize: "14px" }}>1 {token2.symbol} = {Number((token2.priceUSD / token1.priceUSD).toFixed(5))} {token1.symbol} (~${token2.priceUSD && Number(token2.priceUSD.toFixed(5))})</Typography>
+                                            <InfoOutlinedIcon />
+                                        </Stack>
                                     </Stack>
-                                    <Stack direction="row" spacing={1} alignItems="center">
-                                        <Typography sx={{ fontSize: "14px" }}>1 BNB = 3199.7257 BNB (~$3,204)</Typography>
-                                        <InfoOutlinedIcon />
+                                    :
+                                    <Stack direction="column" spacing={1}>
+                                        <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                            <Link underline='none' sx={{ color: "white" }} onClick={() => setRateState(0)}>
+                                                <Stack direction="row" spacing={1} alignItems="center">
+                                                    <Typography sx={{ fontSize: "14px" }}>{`1 ${token1.symbol} Price`}</Typography>
+                                                    <ExpandLessIcon />
+                                                </Stack>
+                                            </Link>
+                                            <Typography sx={{ fontSize: "14px" }}>{`${Number((token1.priceUSD / token2.priceUSD).toFixed(5))} ${token2.symbol} (~$${token1.priceUSD && Number(token1.priceUSD.toFixed(5))})`}</Typography>
+                                        </Stack>
+                                        <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                            <Typography sx={{ fontSize: "14px" }}>{`1 ${token2.symbol} Price`}</Typography>
+                                            <Typography sx={{ fontSize: "14px" }}>{`${Number((token2.priceUSD / token1.priceUSD).toFixed(5))} ${token1.symbol} (~$${token2.priceUSD && Number(token2.priceUSD.toFixed(5))})`}</Typography>
+                                        </Stack>
+                                        {dexsOrder &&
+                                            <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                                <Typography sx={{ fontSize: "14px" }}>Minimum received</Typography>
+                                                <Typography sx={{ fontSize: "14px" }}>{`${Number((dexsOrder[swapSelectData].amountOut-(dexsOrder[swapSelectData].amountOut * slippage / 100)).toFixed(5))} ${token2.symbol}`}</Typography>
+                                            </Stack>
+                                        }
                                     </Stack>
-                                </Stack>
+                                }
                                 <Stack direction="row" justifyContent="space-between" alignItems="center">
                                     <Typography sx={{ fontSize: "14px" }}>Route</Typography>
                                     <Stack direction="row" spacing={1} alignItems="center">
-                                        <Typography sx={{ fontSize: "14px" }}>{`BNB > ETH`}</Typography>
+                                        <Typography sx={{ fontSize: "14px" }}>{`${token1.symbol} > ${token2.symbol}`}</Typography>
                                         <ExpandLessIcon />
                                     </Stack>
                                 </Stack>
-                                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                {/* <Stack direction="row" justifyContent="space-between" alignItems="center">
                                     <Typography sx={{ fontSize: "14px" }}>Liquidity Provider Fee</Typography>
-                                    <Typography sx={{ fontSize: "14px" }}>0,001 BNB</Typography>
+                                    <Typography sx={{ fontSize: "14px" }}>0.001 BNB</Typography>
                                 </Stack>
                                 <Stack direction="row" justifyContent="space-between" alignItems="center">
                                     <Typography sx={{ fontSize: "14px" }}>Gas refund</Typography>
                                     <Chip size='small' label='0% REFUND' sx={{ color: "white", background: "#37AF43", borderRadius: "6px" }} />
-                                </Stack>
+                                </Stack> */}
                             </Stack>
                         </Grid>
                     </Grid>
