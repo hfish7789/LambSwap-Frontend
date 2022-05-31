@@ -6,7 +6,7 @@ import MaterialThemeProvider from "./config/theme";
 import MuiSnackbarProvider from "./config/snackbar";
 import NotificationProvider from "./config/notification";
 import Web3Provider from "./config/web3";
-import App from "./App";
+import App from "./App"
 import './index.css'
 
 ReactDOM.render(
