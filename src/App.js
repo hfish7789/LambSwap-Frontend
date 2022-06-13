@@ -211,8 +211,6 @@ function App() {
     if (newValue !== 5 && newValue !== 3) {
       setValue(newValue);
     }
-    // setMenuPage(0);
-    // setMenuPage_1(0);
   };
 
   const chainMenuOpen = (event, state) => {
@@ -224,7 +222,6 @@ function App() {
     setChainMenuState(null);
     setNetIconState(0);
     if (data) {
-      // if (active) {
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: `0x${Number(data.chainId).toString(16)}` }], // chainId must be in hexadecimal numbers
@@ -234,9 +231,6 @@ function App() {
           setChainState(data);
         });
       });
-      // } else {
-      //   setChainState(data)
-      // }
     }
   };
 
